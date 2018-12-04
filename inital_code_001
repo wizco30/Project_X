@@ -1,0 +1,60 @@
+#all configuration
+import pandas as pd
+import pandas_datareader.data as web
+from pandas_datareader import data, wb
+import datetime as dt
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+import quandl
+quandl.ApiConfig.api_key = "jKCnn3gERrbsJzSw-uK4"
+
+#define the timeline you want to investigate
+#first enter year, month and date for the starting day
+#then enter it for the ending day
+#make sure to use a separate input for every number
+stock = input("Enter the stock ticker:")
+question = input("Do you want to define a specific timeline? (yes/no):")
+
+if question == "yes":
+    y1 = int(input("Starting year (e.g. 2014):"))
+    m1 = int(input("Starting month (e.g. 3 for march):"))
+    d1 = int(input("Starting day (e.g. 6 for the 6th):"))
+    y2 = int(input("Ending year (e.g. 2014):"))
+    m2 = int(input("Ending month (e.g. 3 for march):"))
+    d2 = int(input("Ending day (e.g. 6 for the 6th):"))
+    start = dt.date(y1, m1, d1)
+    end = dt.date(y2, m2, d2)
+else:
+    y1 = 2017
+    m1 = 1
+    d1 = 1
+    y2 = 2017
+    m2 = 12
+    d2 = 31
+    start =  dt.date(y1, m1, d1)
+    end = dt.date(y2, m2, d2)    
+
+#defines the stock you want to analyze
+#stock defines the primary stock you want to check
+df = quandl.get_table("WIKI/PRICES", ticker = stock, date = { 'gte': start, 'lte': end }, paginate=True)
+df.set_index("date", inplace = True)
+print(df.head())
+
+#prints a basic graph of the stock movement
+df.plot(y="adj_close", use_index = True, figsize=(13.5,9), title=stock, color="blue")
+
+#import tools from plotly to make a candlestick chart, setting the key for the user
+import plotly as py
+py.tools.set_credentials_file(username='lackaff', api_key='lk6IEQHhOCr74Dnh757R')
+import plotly.graph_objs as go
+import plotly.plotly as py
+
+#sets the data right for the adjusted prices, then defines the figure from the defined data and prints the plot
+ohlcdata = go.Ohlc(x=df.index,
+                open=df.adj_open,
+                high=df.adj_high,
+                low=df.adj_low,
+                close=df.adj_close)
+fig = [ohlcdata]
+py.iplot(fig, filename=stock)
